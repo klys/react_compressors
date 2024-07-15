@@ -40,6 +40,10 @@ const compression = {
         return new TextDecoder('utf8').decode(uint8Array);
       },
 
+      sizer: (str) => {
+        return new Blob([str]).size;
+      },
+
       deflate: (text_uncompressed) => {
         return compression.toYenc(pako.deflate( compression.stringToUint8Array(text_uncompressed)))
       },
