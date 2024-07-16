@@ -24,7 +24,7 @@ import { Buffer } from "buffer";
 
 import base85 from "@nurliman/base85";
 
-import yenc from "simple-yenc";
+import {stringify, encode, decode} from "simple-yenc";
 
 const compression = {
     stringToUint8Array: (text) => {
@@ -67,7 +67,7 @@ const compression = {
       },
 
       toBase85: (text) => {
-        return base85.encode(text)
+        return base85.encode(text, {wrap: false})
       },
 
       fromBase85: (base85) => {
@@ -76,12 +76,12 @@ const compression = {
 
       toYenc: (uint8Array) => {
         // return a string
-        return yenc.stringify(yenc.encode(uint8Array))
+        return encode(uint8Array)
       },
 
       fromYenc: (yenc) => {
         // return uint8Array
-        return yenc.decode(yenc)
+        return decode(yenc)
       }
 
 }
