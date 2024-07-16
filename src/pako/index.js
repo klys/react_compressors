@@ -26,6 +26,29 @@ import base85 from "@nurliman/base85";
 
 import {stringify, encode, decode} from "simple-yenc";
 
+String.prototype.hexEncode = function(){
+  var hex, i;
+
+  var result = "";
+  for (i=0; i<this.length; i++) {
+      hex = this.charCodeAt(i).toString(16);
+      result += ("000"+hex).slice(-4);
+  }
+
+  return result
+}
+
+String.prototype.hexDecode = function(){
+  var j;
+  var hexes = this.match(/.{1,4}/g) || [];
+  var back = "";
+  for(j = 0; j<hexes.length; j++) {
+      back += String.fromCharCode(parseInt(hexes[j], 16));
+  }
+
+  return back;
+}
+
 const compression = {
     stringToUint8Array: (text) => {
         // Encode the string as UTF-8 bytes
@@ -82,6 +105,11 @@ const compression = {
       fromYenc: (yenc) => {
         // return uint8Array
         return decode(yenc)
+      },
+
+      toHex: (binary) => {
+        console.log("binary", binary)
+        return compression.uint8ArrayToString(binary).hexEncode()
       }
 
 }

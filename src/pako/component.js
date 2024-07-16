@@ -36,6 +36,9 @@ function PakoTest() {
       case "toString":
         setEncodedData(PAKO.gzip(compression.stringToUint8Array(data),{to:'string'}))
         break;
+      case "toHex":
+        setEncodedData(compression.toHex(PAKO.gzip(compression.stringToUint8Array(data),{to:'string'})))
+        break;
     }
     
   };
@@ -81,6 +84,8 @@ function PakoTest() {
       case "none":
         //const bytes3 = atob(data);
         const uint8Array3 = new Uint8Array(data.length);
+        console.log("data: ",data)
+        console.log("Lenght:",data.length)
         for (let i = 0; i < data.length; i++) {
           uint8Array3[i] = data.charCodeAt(i);
         }
@@ -94,6 +99,7 @@ function PakoTest() {
         break;
       case "toString":
           const strArray = data.split(",")
+          console.log(strArray.length)
           const uint8Array2 = new Uint8Array(strArray.length);
           for (let i = 0; i < strArray.length; i++) {
             uint8Array2[i] = strArray[i];
@@ -107,14 +113,47 @@ function PakoTest() {
     }
   };
 
+  const handleSend = async () => {
+    const strArray = data.split(",")
+    const uint8Array2 = new Uint8Array(strArray.length);
+          for (let i = 0; i < strArray.length; i++) {
+            uint8Array2[i] = strArray[i];
+          }
+    const response = await fetch("http://localhost:4001/api/v1/account/picture2/1",{
+      method:"PUT",
+      headers:{
+        'Authorization':`Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkYXRhIjoie1widXNlcmlkXCI6XCIzXCJ9IiwiZXhwIjoxNzIxMTQ0NTU2LCJpYXQiOjE3MjExNDA5NTZ9.CjkrRO1HGdkVgI4Gqmy6O7e1hzxAEX_1LDPxpAZ9dMI`,
+        "Content-Type":"application/octet-stream",
+        'Accept': 'application/octet-stream',
+      },
+      body:uint8Array2
+    })
+
+    console.log(await response.json())
+  }
+
+  const handlePicture = (picture_data) => {
+    console.log("picture_data",picture_data)
+    const readPictureBits = new FileReader();
+        readPictureBits.onload = (binary_data) => {
+          console.log("uncompressed", binary_data.target.result)
+          const compressed = PAKO.gzip(binary_data.target.result, {to:'string'})
+          console.log("compressed", compressed)
+          setEncodedData(compressed)
+        }
+        readPictureBits.readAsArrayBuffer(new Blob(picture_data[0], {type:"application/octet-stream"}))
+  }
+
   return (
     <div>
       <h3>React Compressiong Test</h3>
+      
       <textarea rows="10" cols="50" value={data} onChange={(e) => setData(e.target.value)} />
       <button onClick={handleCompress}>Compress</button>
       <button onClick={handleDecompress}>Decompress</button>
+      <button onClick={handleSend}>Send</button>
       <textarea rows="10" cols="50" value={encodedData}/>
-
+      <p>File: <input type="file" onChange={(e) => handlePicture(e)}/></p>
       <p>
         Enconding:
       <select onChange={(e) => setEncoding(e.target.value)}>
@@ -123,11 +162,12 @@ function PakoTest() {
         <option value="yenc">yEnc</option>
         <option value="none">none</option>
         <option value="toString">toString</option>
+        <option value="toHex">toHex</option>
       </select>
       </p>
       <p>Previous Size: Bytes: {byteSize(data)} bytes  /// length:{data.length}</p>
       <p>New Size: Bytes: {byteSize(encodedData)} bytes /// length:{encodedData.length}</p>
-      {encodedData && <p style={{maxWidth:"500px", width:"500px"}}>Result: {encodedData}</p>}
+      {encodedData && <p style={{maxWidth:"500px", width:"500px"}}>Result: {JSON.stringify(encodedData)}</p>}
         
     </div>
   );
