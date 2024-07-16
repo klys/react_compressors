@@ -70,8 +70,8 @@ const compression = {
         return base85.encode(text, {wrap: false})
       },
 
-      fromBase85: (base85) => {
-        return base85.decode(base85)
+      fromBase85: (base85text) => {
+        return base85.decode(base85text)
       },
 
       toYenc: (uint8Array) => {

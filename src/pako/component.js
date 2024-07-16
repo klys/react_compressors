@@ -8,7 +8,7 @@ const byteSize = str => new Blob([str]).size;
 
 function PakoTest() {
   const [data, setData] = useState('This is some data to compress');
-  const [encodedData, setEncodedData] = useState(null);
+  const [encodedData, setEncodedData] = useState('');
   const [encoding, setEncoding] = useState('base64')
 
   const handleCompress = () => {
@@ -25,13 +25,13 @@ function PakoTest() {
       setEncodedData(base64String);
         break;
       case "base85":
-        setEncodedData(compression.toBase85(String.fromCharCode(...compressedData)))
+        setEncodedData(compression.toBase85(data))
         break;
       case "yenc":
-        setEncodedData(compression.toYenc(compressedData))
+        setEncodedData(compression.toYenc(compression.stringToUint8Array(data)))
         break;
       case "none":
-        setEncodedData(String.fromCharCode(...compressedData))
+        setEncodedData(compressedData)
         break;
       case "toString":
         setEncodedData(PAKO.gzip(compression.stringToUint8Array(data),{to:'string'}))
@@ -73,10 +73,24 @@ function PakoTest() {
         setEncodedData(text);
         break;
       case "base85":
+        setEncodedData(compression.fromBase85(data))
         break;
       case "yenc":
+        setEncodedData(compression.uint8ArrayToString(compression.fromYenc(data)))
         break;
       case "none":
+        //const bytes3 = atob(data);
+        const uint8Array3 = new Uint8Array(data.length);
+        for (let i = 0; i < data.length; i++) {
+          uint8Array3[i] = data.charCodeAt(i);
+        }
+
+        // Decompress using PAKO (example with Gzip)
+        const decompressedData3 = PAKO.inflate(uint8Array3);
+        //setEncodedData(decompressedData)
+        const decoder3 = new TextDecoder();
+        const text3 = decoder3.decode(decompressedData3);
+        setEncodedData(text3)
         break;
       case "toString":
           const strArray = data.split(",")
@@ -111,8 +125,8 @@ function PakoTest() {
         <option value="toString">toString</option>
       </select>
       </p>
-      <p>Previous Size: {byteSize(data)}</p>
-      <p>New Size: {byteSize(encodedData)}</p>
+      <p>Previous Size: Bytes: {byteSize(data)} bytes  /// length:{data.length}</p>
+      <p>New Size: Bytes: {byteSize(encodedData)} bytes /// length:{encodedData.length}</p>
       {encodedData && <p style={{maxWidth:"500px", width:"500px"}}>Result: {encodedData}</p>}
         
     </div>
